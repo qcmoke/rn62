@@ -1,70 +1,73 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import CodePush from "react-native-code-push";
+import React, { useEffect } from "react";
+import { Alert, SafeAreaView, ScrollView, StatusBar, Text, View } from "react-native";
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const App: () => React$Node = () => {
+const App = (props) => {
+
+  useEffect(() => {
+    //https://github.com/microsoft/react-native-code-push/blob/master/docs/api-js.md
+    CodePush.checkForUpdate().then(update => {
+      if (!update) {
+        console.log("已是最新版本");
+        return;
+      }
+      /*
+      CodePushNativeModule
+          downloadUpdate=>mUpdateManager.downloadPackage
+          package-mixins.js=>install=>NativeCodePush.installUpdate=>mUpdateManager.installPackage。（如立即安装则监听Activity生命周期onHostResume后执行restartAppInternal加装安装js，NativeCodePush.restartApp(false)）
+
+       */
+      CodePush.sync({
+        //deploymentKey: "deployment-key-here",
+        updateDialog: {
+          optionalIgnoreButtonLabel: "稍后",
+          optionalInstallButtonLabel: "后台更新",
+          optionalUpdateMessage: "有新版本了，是否更新？",
+          title: "更新提示",
+        },
+        installMode: CodePush.InstallMode.IMMEDIATE,
+        /*
+        installMode: CodePush.InstallMode.ON_NEXT_RESTART,//启动模式三种：ON_NEXT_RESUME、ON_NEXT_RESTART、IMMEDIATE
+        updateDialog: false,   // 苹果公司和中国区安卓的热更新，是不允许弹窗提示的，所以不能设置为true
+        */
+      }).then(status => {
+        switch (status) {
+          case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+            console.log("Checking for updates.");
+            break;
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            console.log("Downloading package.");
+            break;
+          case CodePush.SyncStatus.INSTALLING_UPDATE:
+            console.log("Installing update.");
+            break;
+          case CodePush.SyncStatus.UP_TO_DATE:
+            console.log("Up-to-date.");
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            console.log("Update installed.");
+            break;
+        }
+      }).catch(err => {
+        console.log("=======err====", err);
+      });
+    }).catch(err => {
+      console.log("=======err====", err);
+    });
+
+  }, []);
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
+          style={{ backgroundColor: Colors.lighter }}>
+          <View>
+            <Text>456</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -72,43 +75,5 @@ const App: () => React$Node = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
-
-export default App;
+let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
+export default CodePush(codePushOptions)(App);
