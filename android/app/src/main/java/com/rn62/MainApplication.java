@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
-import com.microsoft.codepush.react.CodePush;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -27,12 +26,7 @@ public class MainApplication extends Application implements ReactApplication {
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
-           packages.add(new CodePush("Y6o5Tz0MA2UwMu5E61och4BbKLHH4ksvOXqog", MainApplication.this, BuildConfig.DEBUG,"http://39.106.195.202:3000/"));
           return packages;
-        }
-        @Override
-        protected String getJSBundleFile() {
-          return CodePush.getJSBundleFile();
         }
 
         @Override
