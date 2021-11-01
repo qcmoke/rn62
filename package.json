@@ -7,9 +7,11 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "bundle-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/"
   },
   "dependencies": {
+    "@react-native-community/async-storage": "^1.12.1",
     "react": "16.11.0",
     "react-native": "0.62.2"
   },

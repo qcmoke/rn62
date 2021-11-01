@@ -1,114 +1,54 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import React, { useEffect } from "react";
+import { NativeModules, SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity } from "react-native";
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import AsyncStorage from "@react-native-community/async-storage";
+import { compareVersion } from "./src/utils/versionUtil";
+import { fetchApi } from "./src/utils/fetchUtil";
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = (props) => {
 
-const App: () => React$Node = () => {
+  useEffect(() => {
+    //let androidBundleVersion = jsBundleVersion.androidBundleVersion;
+    fetchApi("http://192.168.137.1:8089/jsBundle/jsBundleVersion.json?m=" + Math.random(), "", {}).then(async rs => {
+      const localBundleVersion = await AsyncStorage.getItem("localBundleVersion");
+      let lastBundleVersion = rs["androidBundleVersion"];
+      let androidBundleUrl = rs["androidBundleUrl"];
+      console.log("===localBundleVersion,lastBundleVersion==", localBundleVersion, lastBundleVersion);
+      if (!localBundleVersion || compareVersion(localBundleVersion, lastBundleVersion) < 0) {
+        NativeModules.RNJSMainModule.updateJsBundleFile({ androidBundleUrl: androidBundleUrl }).then(rs => {
+          console.log("====更新jsBundle文件成功");
+          AsyncStorage.setItem("localBundleVersion", lastBundleVersion);
+          NativeModules.RNJSMainModule.restartAPP().then(rs => {
+            console.log("重启APP成功");
+          }).catch(err => {
+            console.log(err);
+          });
+        }).catch(err => {
+          console.log("===err", err);
+        });
+      }
+    }).catch(err => {
+      console.log("===err", err);
+    });
+
+  }, []);
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
+          style={{ backgroundColor: "gary" }}>
+          <TouchableOpacity
+            style={{ height: 200, width: 200, backgroundColor: "red" }}
+            onPress={() => {
+            }}>
+            <Text>456</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
 
 export default App;

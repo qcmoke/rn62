@@ -1,0 +1,6 @@
+{
+    "androidBundleVersion": "1.0.2",
+	"androidBundleUrl":"http://192.168.137.1:8089/bundle/index.android.bundle",
+	"iosBundleVersion": "1.0.0",
+	"iosBundleUrl":"http://192.168.137.1:8089/bundle/index.ios.bundle"
+}
